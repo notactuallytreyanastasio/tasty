@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tasty Bookmarks</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🔖 Tasty</h1>
+    </div>
+    
+    <div id="auth-section" class="section hidden">
+      <div class="auth-form">
+        <h3>Sign in to save bookmarks</h3>
+        <form id="login-form">
+          <input type="email" id="email" placeholder="Email" required>
+          <input type="password" id="password" placeholder="Password" required>
+          <button type="submit">Sign In</button>
+        </form>
+        <p class="auth-link">
+          Don't have an account? <a href="#" id="register-link">Register</a>
+        </p>
+      </div>
+    </div>
+
+    <div id="bookmark-section" class="section">
+      <div class="current-page">
+        <h3 id="page-title">Loading...</h3>
+        <p id="page-url">Loading...</p>
+      </div>
+      
+      <form id="bookmark-form">
+        <div class="form-group">
+          <label for="title">Title:</label>
+          <input type="text" id="title" name="title" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="description">Description:</label>
+          <textarea id="description" name="description" rows="3"></textarea>
+        </div>
+        
+        <div class="form-group">
+          <label for="tags">Tags:</label>
+          <input type="text" id="tags" name="tags" placeholder="web, development, elixir">
+          <small>Separate tags with commas</small>
+        </div>
+        
+        <div class="form-group">
+          <label>
+            <input type="checkbox" id="is-public" name="is_public" checked>
+            Make this bookmark public
+          </label>
+        </div>
+        
+        <button type="submit" class="save-btn">Save Bookmark</button>
+      </form>
+      
+      <div id="success-message" class="message success hidden">
+        Bookmark saved successfully!
+      </div>
+      
+      <div id="error-message" class="message error hidden">
+        Failed to save bookmark. Please try again.
+      </div>
+    </div>
+  </div>
+  
+  <script src="popup.js"></script>
+</body>
+</html>

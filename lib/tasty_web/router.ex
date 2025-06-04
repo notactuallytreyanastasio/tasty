@@ -15,6 +15,7 @@ defmodule TastyWeb.Router do
 
   pipeline :api do
     plug :accepts, ["json"]
+    plug CORSPlug, origin: ["http://localhost:4000", "chrome-extension://*"]
   end
 
   scope "/", TastyWeb do

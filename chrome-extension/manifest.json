@@ -1,0 +1,17 @@
+{
+  "manifest_version": 3,
+  "name": "Tasty Bookmarks",
+  "version": "1.0.0",
+  "description": "Save and share bookmarks with Tasty",
+  "permissions": ["activeTab", "storage"],
+  "host_permissions": ["http://localhost:4000/*"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": "icon.png"
+  },
+  "icons": {
+    "16": "icon-16.png",
+    "48": "icon-48.png",
+    "128": "icon-128.png"
+  }
+}
