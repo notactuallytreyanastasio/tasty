@@ -144,8 +144,15 @@ Located in `/chrome-extension/`:
 
 5. **Run migrations:**
    ```bash
+   # Option 1: Use dedicated migrate command (recommended)
+   gigalixir ps:migrate
+   
+   # Option 2: Use run command with POOL_SIZE
    POOL_SIZE=2 gigalixir run mix ecto.migrate
    POOL_SIZE=2 gigalixir run mix run priv/repo/seeds.exs
+   
+   # Option 3: Use release module directly
+   POOL_SIZE=2 gigalixir run "/app/bin/tasty eval \"Tasty.Release.migrate\""
    ```
 
    **Note:** The `POOL_SIZE=2` prefix is required for Gigalixir database operations to prevent connection timeouts.
@@ -188,7 +195,8 @@ mix ecto.rollback        # Rollback last migration
 mix ecto.reset           # Drop, create, migrate, seed
 
 # Production
-POOL_SIZE=2 gigalixir run mix ecto.migrate
+gigalixir ps:migrate                              # Recommended method
+POOL_SIZE=2 gigalixir run mix ecto.migrate        # Alternative method
 POOL_SIZE=2 gigalixir run mix ecto.rollback
 ```
 
@@ -310,6 +318,27 @@ mix deps.audit           # Security audit
 brew services start postgresql
 
 # Verify credentials in config/dev.exs
+```
+
+**Gigalixir migration failures:**
+```bash
+# Try these methods in order:
+
+# 1. Use dedicated migrate command
+gigalixir ps:migrate
+
+# 2. Restart app and try again
+gigalixir restart
+gigalixir ps:migrate
+
+# 3. Use run command with POOL_SIZE
+POOL_SIZE=2 gigalixir run mix ecto.migrate
+
+# 4. Use release module directly
+POOL_SIZE=2 gigalixir run "/app/bin/tasty eval \"Tasty.Release.migrate\""
+
+# 5. Check app status
+gigalixir ps
 ```
 
 **Asset compilation errors:**

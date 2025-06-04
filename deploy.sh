@@ -9,9 +9,12 @@ echo "🚀 Deploying to Gigalixir..."
 echo "📦 Pushing to Gigalixir..."
 git push gigalixir main
 
-# Run migrations with required POOL_SIZE
+# Run migrations (try dedicated command first, fallback to run command)
 echo "🗄️ Running database migrations..."
-POOL_SIZE=2 gigalixir run mix ecto.migrate
+if ! gigalixir ps:migrate; then
+    echo "⚠️ ps:migrate failed, trying run command with POOL_SIZE..."
+    POOL_SIZE=2 gigalixir run mix ecto.migrate
+fi
 
 # Seed the database
 echo "🌱 Seeding database..."
