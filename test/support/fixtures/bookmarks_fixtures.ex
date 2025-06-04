@@ -8,7 +8,10 @@ defmodule Tasty.BookmarksFixtures do
   Generate a bookmark.
   """
   def bookmark_fixture(attrs \\ %{}) do
+    attrs = Enum.into(attrs, %{})
     user = Map.get_lazy(attrs, :user, fn -> Tasty.AccountsFixtures.user_fixture() end)
+    
+    attrs = Map.delete(attrs, :user)
     
     {:ok, bookmark} =
       attrs
@@ -34,9 +37,9 @@ defmodule Tasty.BookmarksFixtures do
     {:ok, tag} =
       attrs
       |> Enum.into(%{
-        color: "some color",
+        color: "#ffffff",
         name: "some name",
-        slug: "some slug"
+        slug: "some-name"
       })
       |> Tasty.Bookmarks.create_tag()
 

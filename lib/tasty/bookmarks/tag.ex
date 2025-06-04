@@ -16,11 +16,12 @@ defmodule Tasty.Bookmarks.Tag do
   def changeset(tag, attrs) do
     tag
     |> cast(attrs, [:name, :slug, :color])
-    |> validate_required([:name, :slug])
+    |> validate_required([:name])
+    |> maybe_generate_slug()
+    |> validate_required([:slug])
     |> unique_constraint(:name)
     |> unique_constraint(:slug)
     |> validate_format(:slug, ~r/^[a-z0-9-]+$/, message: "must contain only lowercase letters, numbers, and hyphens")
-    |> maybe_generate_slug()
   end
 
   defp maybe_generate_slug(changeset) do
@@ -37,8 +38,9 @@ defmodule Tasty.Bookmarks.Tag do
   defp slugify(text) do
     text
     |> String.downcase()
-    |> String.replace(~r/[^a-z0-9\s-]/, "")
-    |> String.replace(~r/\s+/, "-")
+    |> String.replace(~r/[^a-z0-9\s\-&\/\(\)\.\+!]/, "")
+    |> String.replace(~r/[\s&\/\(\)\.\+!]+/, "-")
+    |> String.replace(~r/-+/, "-")
     |> String.trim("-")
   end
 end

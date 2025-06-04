@@ -2,19 +2,25 @@ defmodule TastyWeb.BookmarkControllerTest do
   use TastyWeb.ConnCase
 
   import Tasty.BookmarksFixtures
+  import Tasty.AccountsFixtures
 
   alias Tasty.Bookmarks.Bookmark
 
   @create_attrs %{
-
+    url: "https://example.com",
+    title: "Test Bookmark",
+    description: "A test bookmark"
   }
   @update_attrs %{
-
+    url: "https://updated.com",
+    title: "Updated Bookmark",
+    description: "An updated bookmark"
   }
-  @invalid_attrs %{}
+  @invalid_attrs %{url: nil, title: nil}
 
   setup %{conn: conn} do
-    {:ok, conn: put_req_header(conn, "accept", "application/json")}
+    user = user_fixture()
+    {:ok, conn: put_req_header(conn, "accept", "application/json"), user: user}
   end
 
   describe "index" do
@@ -25,8 +31,9 @@ defmodule TastyWeb.BookmarkControllerTest do
   end
 
   describe "create bookmark" do
-    test "renders bookmark when data is valid", %{conn: conn} do
-      conn = post(conn, ~p"/api/bookmarks", bookmark: @create_attrs)
+    test "renders bookmark when data is valid", %{conn: conn, user: user} do
+      create_attrs = Map.put(@create_attrs, :user_id, user.id)
+      conn = post(conn, ~p"/api/bookmarks", bookmark: create_attrs)
       assert %{"id" => id} = json_response(conn, 201)["data"]
 
       conn = get(conn, ~p"/api/bookmarks/#{id}")

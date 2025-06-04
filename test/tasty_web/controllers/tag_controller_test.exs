@@ -6,12 +6,14 @@ defmodule TastyWeb.TagControllerTest do
   alias Tasty.Bookmarks.Tag
 
   @create_attrs %{
-
+    name: "test tag",
+    color: "#ff0000"
   }
   @update_attrs %{
-
+    name: "updated tag",
+    color: "#00ff00"
   }
-  @invalid_attrs %{}
+  @invalid_attrs %{name: nil}
 
   setup %{conn: conn} do
     {:ok, conn: put_req_header(conn, "accept", "application/json")}

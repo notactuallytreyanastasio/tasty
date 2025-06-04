@@ -14,7 +14,12 @@ defmodule TastyWeb.BookmarkController do
   def create(conn, %{"bookmark" => bookmark_params}) do
     # For now, we'll handle bookmarks without authentication
     # TODO: Add authentication and set user_id from authenticated user
-    bookmark_params = Map.put(bookmark_params, "user_id", 1)
+    bookmark_params = 
+      if bookmark_params["user_id"] do
+        bookmark_params
+      else
+        Map.put(bookmark_params, "user_id", 1)
+      end
     
     with {:ok, %Bookmark{} = bookmark} <- Bookmarks.create_bookmark(bookmark_params) do
       conn

@@ -8,11 +8,11 @@ defmodule Tasty.Bookmarks.Bookmark do
     field :url, :string
     field :favicon_url, :string
     field :screenshot_url, :string
-    field :is_public, :boolean, default: true
-    field :view_count, :integer, default: 0
+    field :is_public, :boolean
+    field :view_count, :integer
 
     belongs_to :user, Tasty.Accounts.User
-    many_to_many :tags, Tasty.Bookmarks.Tag, join_through: "bookmark_tags"
+    many_to_many :tags, Tasty.Bookmarks.Tag, join_through: "bookmark_tags", on_replace: :delete
 
     timestamps(type: :utc_datetime)
   end
@@ -25,5 +25,19 @@ defmodule Tasty.Bookmarks.Bookmark do
     |> validate_format(:url, ~r/^https?:\/\//, message: "must be a valid URL")
     |> validate_length(:title, max: 255)
     |> foreign_key_constraint(:user_id)
+    |> set_defaults()
+  end
+
+  defp set_defaults(changeset) do
+    changeset
+    |> put_default(:is_public, true)
+    |> put_default(:view_count, 0)
+  end
+
+  defp put_default(changeset, field, default_value) do
+    case get_field(changeset, field) do
+      nil -> put_change(changeset, field, default_value)
+      _ -> changeset
+    end
   end
 end

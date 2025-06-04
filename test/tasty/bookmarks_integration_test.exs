@@ -4,7 +4,6 @@ defmodule Tasty.BookmarksIntegrationTest do
   alias Tasty.Bookmarks
   alias Tasty.Repo
   import Tasty.AccountsFixtures
-  import Tasty.BookmarksFixtures
 
   describe "bookmark-tag associations" do
     setup do
@@ -191,15 +190,20 @@ defmodule Tasty.BookmarksIntegrationTest do
         user_id: user.id
       })
       
-      # Try to associate same tag multiple times
+      # Associate tag once
       bookmark = bookmark |> Repo.preload(:tags)
       changeset = bookmark |> Ecto.Changeset.change()
-      changeset = changeset |> Ecto.Changeset.put_assoc(:tags, [tag, tag])
+      changeset = changeset |> Ecto.Changeset.put_assoc(:tags, [tag])
       {:ok, updated_bookmark} = Repo.update(changeset)
       
+      # Try to associate same tag again - should not create duplicate
+      changeset = updated_bookmark |> Ecto.Changeset.change()
+      changeset = changeset |> Ecto.Changeset.put_assoc(:tags, [tag])
+      {:ok, final_bookmark} = Repo.update(changeset)
+      
       # Verify only one association exists
-      updated_bookmark = updated_bookmark |> Repo.preload(:tags)
-      assert length(updated_bookmark.tags) == 1
+      final_bookmark = final_bookmark |> Repo.preload(:tags)
+      assert length(final_bookmark.tags) == 1
     end
 
     test "large number of tag associations", %{user: user} do

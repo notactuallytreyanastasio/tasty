@@ -66,7 +66,7 @@ defmodule Tasty.BookmarksTest do
 
     test "list_bookmarks/1 preloads associations" do
       user = Tasty.AccountsFixtures.user_fixture()
-      bookmark = bookmark_fixture(user: user)
+      _created_bookmark = bookmark_fixture(user: user)
       
       bookmarks = Bookmarks.list_bookmarks()
       bookmark = hd(bookmarks)
@@ -131,14 +131,22 @@ defmodule Tasty.BookmarksTest do
 
     test "update_bookmark/2 with valid data updates the bookmark" do
       bookmark = bookmark_fixture()
-      update_attrs = %{description: "some updated description", title: "some updated title", url: "some updated url", favicon_url: "some updated favicon_url", screenshot_url: "some updated screenshot_url", is_public: false, view_count: 43}
+      update_attrs = %{
+        description: "some updated description", 
+        title: "some updated title", 
+        url: "https://updated-example.com", 
+        favicon_url: "https://updated-example.com/favicon.ico", 
+        screenshot_url: "https://updated-example.com/screenshot.png", 
+        is_public: false, 
+        view_count: 43
+      }
 
       assert {:ok, %Bookmark{} = bookmark} = Bookmarks.update_bookmark(bookmark, update_attrs)
       assert bookmark.description == "some updated description"
       assert bookmark.title == "some updated title"
-      assert bookmark.url == "some updated url"
-      assert bookmark.favicon_url == "some updated favicon_url"
-      assert bookmark.screenshot_url == "some updated screenshot_url"
+      assert bookmark.url == "https://updated-example.com"
+      assert bookmark.favicon_url == "https://updated-example.com/favicon.ico"
+      assert bookmark.screenshot_url == "https://updated-example.com/screenshot.png"
       assert bookmark.is_public == false
       assert bookmark.view_count == 43
     end
@@ -179,12 +187,12 @@ defmodule Tasty.BookmarksTest do
     end
 
     test "create_tag/1 with valid data creates a tag" do
-      valid_attrs = %{name: "some name", color: "some color", slug: "some slug"}
+      valid_attrs = %{name: "some name", color: "some color", slug: "some-name"}
 
       assert {:ok, %Tag{} = tag} = Bookmarks.create_tag(valid_attrs)
       assert tag.name == "some name"
       assert tag.color == "some color"
-      assert tag.slug == "some slug"
+      assert tag.slug == "some-name"
     end
 
     test "create_tag/1 with invalid data returns error changeset" do
@@ -193,12 +201,12 @@ defmodule Tasty.BookmarksTest do
 
     test "update_tag/2 with valid data updates the tag" do
       tag = tag_fixture()
-      update_attrs = %{name: "some updated name", color: "some updated color", slug: "some updated slug"}
+      update_attrs = %{name: "some updated name", color: "some updated color", slug: "some-updated-name"}
 
       assert {:ok, %Tag{} = tag} = Bookmarks.update_tag(tag, update_attrs)
       assert tag.name == "some updated name"
       assert tag.color == "some updated color"
-      assert tag.slug == "some updated slug"
+      assert tag.slug == "some-updated-name"
     end
 
     test "update_tag/2 with invalid data returns error changeset" do

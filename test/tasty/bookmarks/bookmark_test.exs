@@ -10,7 +10,7 @@ defmodule Tasty.Bookmarks.BookmarkTest do
       {:ok, user: user}
     end
 
-    test "validates required fields", %{user: user} do
+    test "validates required fields", %{user: _user} do
       changeset = Bookmark.changeset(%Bookmark{}, %{})
       
       assert %{
@@ -130,7 +130,10 @@ defmodule Tasty.Bookmarks.BookmarkTest do
       
       # The foreign key constraint is validated at the database level
       # This test ensures the changeset includes the constraint
-      assert changeset.constraints == [%{field: :user_id, type: :foreign_key}]
+      assert length(changeset.constraints) == 1
+      constraint = hd(changeset.constraints)
+      assert constraint.field == :user_id
+      assert constraint.type == :foreign_key
     end
 
     test "handles boolean fields correctly", %{user: user} do
