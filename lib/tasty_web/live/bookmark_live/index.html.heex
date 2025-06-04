@@ -1,0 +1,117 @@
+<div class="min-h-screen bg-white text-sm">
+  <!-- Condensed Header -->
+  <div class="border-b border-gray-200 px-4 py-3">
+    <div class="flex items-center justify-between mb-3">
+      <h1 class="text-lg font-semibold text-gray-900">Tasty Discover</h1>
+      <button 
+        phx-click="refresh"
+        class="text-xs px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded transition-colors"
+        disabled={@loading}
+      >
+        <%= if @loading do %>⟳<% else %>refresh<% end %>
+      </button>
+    </div>
+    
+    <!-- Compact Tag Bar -->
+    <div class="text-xs text-gray-600 mb-2">
+      <span class="font-medium">ALL TAGS</span>
+    </div>
+    <div class="flex flex-wrap gap-1">
+      <%= for tag <- @tags do %>
+        <button
+          phx-click="select_tag"
+          phx-value-tag_id={tag.id}
+          class={[
+            "text-xs px-2 py-1 rounded transition-colors",
+            if @selected_tag && @selected_tag.id == tag.id do
+              "bg-blue-100 text-blue-800 font-medium"
+            else
+              "bg-gray-100 text-gray-600 hover:bg-gray-200"
+            end
+          ]}
+        >
+          <%= String.downcase(tag.name) %> (<%= Map.get(@tag_counts, tag.id, 0) %>)
+        </button>
+      <% end %>
+      <%= if @selected_tag do %>
+        <button 
+          phx-click="clear_tag"
+          class="text-xs px-2 py-1 text-blue-600 hover:text-blue-800"
+        >
+          clear
+        </button>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Single Line Layout -->
+  <div class="px-4 py-3">
+    <!-- Bookmark Entries -->
+    <div class="space-y-1">
+      <%= for bookmark <- @bookmarks do %>
+        <div class="py-1 text-sm hover:bg-gray-50 transition-colors">
+          <div class="flex items-center gap-3">
+            <!-- Title Link -->
+            <a 
+              href={bookmark.url} 
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-blue-600 hover:text-blue-800 font-medium flex-shrink-0"
+            >
+              <%= bookmark.title %>
+            </a>
+            
+            <!-- Tags -->
+            <%= if length(bookmark.tags) > 0 do %>
+              <div class="flex gap-1 flex-shrink-0">
+                <%= for tag <- Enum.take(bookmark.tags, 2) do %>
+                  <button
+                    phx-click="select_tag"
+                    phx-value-tag_id={tag.id}
+                    class="text-xs px-1 py-0.5 rounded text-gray-600 bg-gray-100 hover:bg-gray-200"
+                  >
+                    <%= String.downcase(tag.name) %>
+                  </button>
+                <% end %>
+                <%= if length(bookmark.tags) > 2 do %>
+                  <span class="text-xs text-gray-400">+<%= length(bookmark.tags) - 2 %></span>
+                <% end %>
+              </div>
+            <% end %>
+            
+            <!-- Stats and Meta -->
+            <div class="flex items-center gap-2 text-xs text-gray-500 ml-auto flex-shrink-0">
+              <span><%= bookmark.view_count %> pts</span>
+              <span>•</span>
+              <span>by <%= bookmark.user.username %></span>
+              <span>•</span>
+              <span><%= format_time_ago(bookmark.inserted_at) %></span>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Compact Load More -->
+    <%= if length(@bookmarks) == 0 do %>
+      <div class="text-center py-8 text-gray-500">
+        <%= if @selected_tag do %>
+          No bookmarks found for "<%= @selected_tag.name %>". 
+          <button phx-click="clear_tag" class="text-blue-600 hover:text-blue-800">Show all</button>
+        <% else %>
+          No bookmarks available.
+        <% end %>
+      </div>
+    <% else %>
+      <div class="text-center py-4">
+        <button 
+          phx-click="refresh"
+          class="text-xs px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded transition-colors"
+          disabled={@loading}
+        >
+          <%= if @loading do %>Loading...<% else %>Load More<% end %>
+        </button>
+      </div>
+    <% end %>
+  </div>
+</div>

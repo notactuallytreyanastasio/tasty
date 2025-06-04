@@ -22,6 +22,7 @@ defmodule TastyWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :home
+    live "/discover", BookmarkLive.Index, :index
   end
 
   # API routes

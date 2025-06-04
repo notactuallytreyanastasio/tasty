@@ -21,8 +21,59 @@ defmodule Tasty.Bookmarks do
     from(b in Bookmark)
     |> filter_by_user_id(params)
     |> filter_by_is_public(params)
+    |> filter_by_tag(params)
+    |> apply_ordering(params)
+    |> apply_limit(params)
     |> preload([:user, :tags])
     |> Repo.all()
+  end
+
+  @doc """
+  Returns a random sampling of public bookmarks for the discovery feed.
+  
+  ## Options
+  - limit: number of bookmarks to return (default: 20)
+  - tag_id: filter by specific tag
+  """
+  def list_public_bookmarks(opts \\ []) do
+    limit = Keyword.get(opts, :limit, 20)
+    tag_id = Keyword.get(opts, :tag_id, nil)
+    
+    from(b in Bookmark)
+    |> where([b], b.is_public == true)
+    |> maybe_filter_by_tag_id(tag_id)
+    |> order_by([b], fragment("RANDOM()"))
+    |> limit(^limit)
+    |> preload([:user, :tags])
+    |> Repo.all()
+  end
+
+  @doc """
+  Returns tags ordered by bookmark count for popular tags display.
+  """
+  def list_popular_tags(limit \\ 20) do
+    from(t in Tasty.Bookmarks.Tag)
+    |> join(:left, [t], bt in "bookmark_tags", on: bt.tag_id == t.id)
+    |> join(:left, [t, bt], b in Bookmark, on: b.id == bt.bookmark_id and b.is_public == true)
+    |> group_by([t], t.id)
+    |> order_by([t, bt, b], desc: count(b.id))
+    |> limit(^limit)
+    |> select([t, bt, b], {t, count(b.id)})
+    |> Repo.all()
+    |> Enum.map(fn {tag, _count} -> tag end)
+  end
+
+  @doc """
+  Returns a map of tag_id => count for public bookmarks.
+  """
+  def get_tag_counts_for_public_bookmarks do
+    from(t in Tasty.Bookmarks.Tag)
+    |> join(:left, [t], bt in "bookmark_tags", on: bt.tag_id == t.id)
+    |> join(:left, [t, bt], b in Bookmark, on: b.id == bt.bookmark_id and b.is_public == true)
+    |> group_by([t], t.id)
+    |> select([t, bt, b], {t.id, count(b.id)})
+    |> Repo.all()
+    |> Map.new()
   end
 
   defp filter_by_user_id(query, %{"user_id" => user_id}) when not is_nil(user_id) do
@@ -34,6 +85,41 @@ defmodule Tasty.Bookmarks do
     from b in query, where: b.is_public == true
   end
   defp filter_by_is_public(query, _), do: query
+
+  defp filter_by_tag(query, %{"tag_id" => tag_id}) when not is_nil(tag_id) do
+    from b in query,
+      join: bt in "bookmark_tags", on: bt.bookmark_id == b.id,
+      where: bt.tag_id == ^tag_id
+  end
+  defp filter_by_tag(query, _), do: query
+
+  defp maybe_filter_by_tag_id(query, nil), do: query
+  defp maybe_filter_by_tag_id(query, tag_id) do
+    from b in query,
+      join: bt in "bookmark_tags", on: bt.bookmark_id == b.id,
+      where: bt.tag_id == ^tag_id
+  end
+
+  defp apply_ordering(query, %{"order" => "recent"}) do
+    from b in query, order_by: [desc: b.inserted_at]
+  end
+  defp apply_ordering(query, %{"order" => "popular"}) do
+    from b in query, order_by: [desc: b.view_count]
+  end
+  defp apply_ordering(query, %{"order" => "random"}) do
+    from b in query, order_by: fragment("RANDOM()")
+  end
+  defp apply_ordering(query, _) do
+    from b in query, order_by: [desc: b.inserted_at]
+  end
+
+  defp apply_limit(query, %{"limit" => limit}) when is_binary(limit) do
+    case Integer.parse(limit) do
+      {limit_int, ""} -> limit(query, ^limit_int)
+      _ -> query
+    end
+  end
+  defp apply_limit(query, _), do: query
 
   @doc """
   Gets a single bookmark.
