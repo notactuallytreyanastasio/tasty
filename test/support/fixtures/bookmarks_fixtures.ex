@@ -8,16 +8,19 @@ defmodule Tasty.BookmarksFixtures do
   Generate a bookmark.
   """
   def bookmark_fixture(attrs \\ %{}) do
+    user = Map.get_lazy(attrs, :user, fn -> Tasty.AccountsFixtures.user_fixture() end)
+    
     {:ok, bookmark} =
       attrs
       |> Enum.into(%{
         description: "some description",
-        favicon_url: "some favicon_url",
+        favicon_url: "https://example.com/favicon.ico",
         is_public: true,
-        screenshot_url: "some screenshot_url",
+        screenshot_url: "https://example.com/screenshot.png",
         title: "some title",
-        url: "some url",
-        view_count: 42
+        url: "https://example.com",
+        view_count: 42,
+        user_id: user.id
       })
       |> Tasty.Bookmarks.create_bookmark()
 

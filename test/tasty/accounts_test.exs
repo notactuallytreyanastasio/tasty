@@ -76,12 +76,47 @@ defmodule Tasty.AccountsTest do
 
     test "validates email uniqueness" do
       %{email: email} = user_fixture()
-      {:error, changeset} = Accounts.register_user(%{email: email})
+      {:error, changeset} = Accounts.register_user(%{email: email, username: unique_user_username()})
       assert "has already been taken" in errors_on(changeset).email
 
       # Now try with the upper cased email too, to check that email case is ignored.
-      {:error, changeset} = Accounts.register_user(%{email: String.upcase(email)})
+      {:error, changeset} = Accounts.register_user(%{email: String.upcase(email), username: unique_user_username()})
       assert "has already been taken" in errors_on(changeset).email
+    end
+
+    test "validates username uniqueness" do
+      %{username: username} = user_fixture()
+      {:error, changeset} = Accounts.register_user(%{email: unique_user_email(), username: username})
+      assert "has already been taken" in errors_on(changeset).username
+    end
+
+    test "validates username requirements" do
+      # Too short
+      {:error, changeset} = Accounts.register_user(%{email: unique_user_email(), username: "ab", password: valid_user_password()})
+      assert "should be at least 3 character(s)" in errors_on(changeset).username
+
+      # Too long  
+      long_username = String.duplicate("a", 31)
+      {:error, changeset} = Accounts.register_user(%{email: unique_user_email(), username: long_username, password: valid_user_password()})
+      assert "should be at most 30 character(s)" in errors_on(changeset).username
+
+      # Invalid characters
+      {:error, changeset} = Accounts.register_user(%{email: unique_user_email(), username: "test@user", password: valid_user_password()})
+      assert "can only contain letters, numbers, underscore and hyphen" in errors_on(changeset).username
+    end
+
+    test "registers users with bio and avatar_url" do
+      attrs = %{
+        email: unique_user_email(),
+        username: unique_user_username(),
+        password: valid_user_password(),
+        bio: "Test bio",
+        avatar_url: "https://example.com/avatar.jpg"
+      }
+      
+      {:ok, user} = Accounts.register_user(attrs)
+      assert user.bio == "Test bio"
+      assert user.avatar_url == "https://example.com/avatar.jpg"
     end
 
     test "registers users with a hashed password" do

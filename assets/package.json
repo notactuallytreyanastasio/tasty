@@ -1,0 +1,11 @@
+{
+  "scripts": {
+    "deploy": "NODE_ENV=production tailwindcss --input=css/app.css --output=../priv/static/assets/app.css --postcss && node build.js --deploy",
+    "watch": "NODE_ENV=development tailwindcss --input=css/app.css --output=../priv/static/assets/app.css --postcss --watch"
+  },
+  "devDependencies": {
+    "esbuild": "^0.17.11",
+    "tailwindcss": "^3.2.7",
+    "autoprefixer": "^10.4.14"
+  }
+}

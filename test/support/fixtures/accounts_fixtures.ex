@@ -10,9 +10,12 @@ defmodule Tasty.AccountsFixtures do
   def valid_user_attributes(attrs \\ %{}) do
     Enum.into(attrs, %{
       email: unique_user_email(),
+      username: unique_user_username(),
       password: valid_user_password()
     })
   end
+
+  def unique_user_username, do: "user#{System.unique_integer()}"
 
   def user_fixture(attrs \\ %{}) do
     {:ok, user} =

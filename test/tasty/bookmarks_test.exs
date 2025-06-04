@@ -12,7 +12,68 @@ defmodule Tasty.BookmarksTest do
 
     test "list_bookmarks/0 returns all bookmarks" do
       bookmark = bookmark_fixture()
-      assert Bookmarks.list_bookmarks() == [bookmark]
+      bookmarks = Bookmarks.list_bookmarks()
+      assert length(bookmarks) == 1
+      assert hd(bookmarks).id == bookmark.id
+    end
+
+    test "list_bookmarks/1 filters by user_id" do
+      user1 = Tasty.AccountsFixtures.user_fixture()
+      user2 = Tasty.AccountsFixtures.user_fixture()
+      
+      bookmark1 = bookmark_fixture(user: user1)
+      bookmark2 = bookmark_fixture(user: user2)
+      
+      user1_bookmarks = Bookmarks.list_bookmarks(%{"user_id" => user1.id})
+      user2_bookmarks = Bookmarks.list_bookmarks(%{"user_id" => user2.id})
+      
+      assert length(user1_bookmarks) == 1
+      assert hd(user1_bookmarks).id == bookmark1.id
+      
+      assert length(user2_bookmarks) == 1
+      assert hd(user2_bookmarks).id == bookmark2.id
+    end
+
+    test "list_bookmarks/1 filters public bookmarks only" do
+      user = Tasty.AccountsFixtures.user_fixture()
+      
+      public_bookmark = bookmark_fixture(user: user, is_public: true)
+      _private_bookmark = bookmark_fixture(user: user, is_public: false)
+      
+      public_bookmarks = Bookmarks.list_bookmarks(%{"public_only" => "true"})
+      
+      assert length(public_bookmarks) == 1
+      assert hd(public_bookmarks).id == public_bookmark.id
+    end
+
+    test "list_bookmarks/1 combines filters" do
+      user1 = Tasty.AccountsFixtures.user_fixture()
+      user2 = Tasty.AccountsFixtures.user_fixture()
+      
+      _user1_public = bookmark_fixture(user: user1, is_public: true)
+      _user1_private = bookmark_fixture(user: user1, is_public: false)
+      user2_public = bookmark_fixture(user: user2, is_public: true)
+      _user2_private = bookmark_fixture(user: user2, is_public: false)
+      
+      filtered_bookmarks = Bookmarks.list_bookmarks(%{
+        "user_id" => user2.id,
+        "public_only" => "true"
+      })
+      
+      assert length(filtered_bookmarks) == 1
+      assert hd(filtered_bookmarks).id == user2_public.id
+    end
+
+    test "list_bookmarks/1 preloads associations" do
+      user = Tasty.AccountsFixtures.user_fixture()
+      bookmark = bookmark_fixture(user: user)
+      
+      bookmarks = Bookmarks.list_bookmarks()
+      bookmark = hd(bookmarks)
+      
+      assert Ecto.assoc_loaded?(bookmark.user)
+      assert Ecto.assoc_loaded?(bookmark.tags)
+      assert bookmark.user.id == user.id
     end
 
     test "get_bookmark!/1 returns the bookmark with given id" do
@@ -21,16 +82,47 @@ defmodule Tasty.BookmarksTest do
     end
 
     test "create_bookmark/1 with valid data creates a bookmark" do
-      valid_attrs = %{description: "some description", title: "some title", url: "some url", favicon_url: "some favicon_url", screenshot_url: "some screenshot_url", is_public: true, view_count: 42}
+      user = Tasty.AccountsFixtures.user_fixture()
+      valid_attrs = %{
+        description: "some description", 
+        title: "some title", 
+        url: "https://example.com", 
+        favicon_url: "https://example.com/favicon.ico", 
+        screenshot_url: "https://example.com/screenshot.png", 
+        is_public: true, 
+        view_count: 42,
+        user_id: user.id
+      }
 
       assert {:ok, %Bookmark{} = bookmark} = Bookmarks.create_bookmark(valid_attrs)
       assert bookmark.description == "some description"
       assert bookmark.title == "some title"
-      assert bookmark.url == "some url"
-      assert bookmark.favicon_url == "some favicon_url"
-      assert bookmark.screenshot_url == "some screenshot_url"
+      assert bookmark.url == "https://example.com"
+      assert bookmark.favicon_url == "https://example.com/favicon.ico"
+      assert bookmark.screenshot_url == "https://example.com/screenshot.png"
       assert bookmark.is_public == true
       assert bookmark.view_count == 42
+      assert bookmark.user_id == user.id
+    end
+
+    test "create_bookmark/1 with invalid URL returns error changeset" do
+      user = Tasty.AccountsFixtures.user_fixture()
+      invalid_attrs = %{
+        title: "Test", 
+        url: "not-a-url",
+        user_id: user.id
+      }
+
+      assert {:error, %Ecto.Changeset{}} = Bookmarks.create_bookmark(invalid_attrs)
+    end
+
+    test "create_bookmark/1 without user_id returns error changeset" do
+      attrs = %{
+        title: "Test", 
+        url: "https://example.com"
+      }
+
+      assert {:error, %Ecto.Changeset{}} = Bookmarks.create_bookmark(attrs)
     end
 
     test "create_bookmark/1 with invalid data returns error changeset" do
