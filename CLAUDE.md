@@ -313,15 +313,6 @@ AWS_SECRET_ACCESS_KEY=<for-screenshot-storage>
 AWS_S3_BUCKET=tasty-screenshots
 ```
 
-## Security Considerations
-
-1. **API Authentication**: Use Guardian for JWT tokens
-2. **Rate Limiting**: Implement with ExRated
-3. **CORS**: Configure for Chrome extension
-4. **Input Validation**: Sanitize all user inputs
-5. **SQL Injection**: Use Ecto parameterized queries
-6. **XSS Prevention**: Use Phoenix HTML safe functions
-
 ## Performance Optimizations
 
 1. **Database Indexes**
@@ -330,30 +321,11 @@ AWS_S3_BUCKET=tasty-screenshots
    - tags.slug
    - bookmark_tags compound index
 
-2. **Caching**
-   - Popular bookmarks
-   - User profiles
-   - Tag clouds
 
-3. **Background Jobs** (using Oban)
+2. **Background Jobs** (using Oban)
    - Screenshot generation
    - Email notifications
    - Data cleanup
 
 ## Deployment Considerations
-
-1. **Infrastructure**
-   - Elixir/OTP release with Distillery
-   - PostgreSQL database
-   - Redis for caching/sessions
-   - CDN for static assets
-
-2. **Monitoring**
-   - AppSignal or New Relic
-   - Error tracking with Sentry
-   - Logging with LoggerJSON
-
-3. **CI/CD**
-   - GitHub Actions for tests
-   - Automated deployments
-   - Database migration strategy
+Use Gigalixir from the getgo. It's easy.
