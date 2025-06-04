@@ -17,9 +17,23 @@ defmodule Tasty.Bookmarks do
       [%Bookmark{}, ...]
 
   """
-  def list_bookmarks do
-    Repo.all(Bookmark)
+  def list_bookmarks(params \\ %{}) do
+    from(b in Bookmark)
+    |> filter_by_user_id(params)
+    |> filter_by_is_public(params)
+    |> preload([:user, :tags])
+    |> Repo.all()
   end
+
+  defp filter_by_user_id(query, %{"user_id" => user_id}) when not is_nil(user_id) do
+    from b in query, where: b.user_id == ^user_id
+  end
+  defp filter_by_user_id(query, _), do: query
+
+  defp filter_by_is_public(query, %{"public_only" => "true"}) do
+    from b in query, where: b.is_public == true
+  end
+  defp filter_by_is_public(query, _), do: query
 
   @doc """
   Gets a single bookmark.

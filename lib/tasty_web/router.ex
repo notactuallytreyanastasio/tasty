@@ -23,10 +23,13 @@ defmodule TastyWeb.Router do
     get "/", PageController, :home
   end
 
-  # Other scopes may use custom stacks.
-  # scope "/api", TastyWeb do
-  #   pipe_through :api
-  # end
+  # API routes
+  scope "/api", TastyWeb do
+    pipe_through :api
+
+    resources "/bookmarks", BookmarkController, except: [:new, :edit]
+    resources "/tags", TagController, except: [:new, :edit]
+  end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development
   if Application.compile_env(:tasty, :dev_routes) do
