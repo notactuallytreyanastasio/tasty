@@ -144,9 +144,11 @@ Located in `/chrome-extension/`:
 
 5. **Run migrations:**
    ```bash
-   gigalixir run mix ecto.migrate
-   gigalixir run mix run priv/repo/seeds.exs
+   POOL_SIZE=2 gigalixir run mix ecto.migrate
+   POOL_SIZE=2 gigalixir run mix run priv/repo/seeds.exs
    ```
+
+   **Note:** The `POOL_SIZE=2` prefix is required for Gigalixir database operations to prevent connection timeouts.
 
 ### Environment Variables
 
@@ -186,8 +188,8 @@ mix ecto.rollback        # Rollback last migration
 mix ecto.reset           # Drop, create, migrate, seed
 
 # Production
-gigalixir run mix ecto.migrate
-gigalixir run mix ecto.rollback
+POOL_SIZE=2 gigalixir run mix ecto.migrate
+POOL_SIZE=2 gigalixir run mix ecto.rollback
 ```
 
 **Application management:**
